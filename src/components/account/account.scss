@@ -1,0 +1,10 @@
+.account-container {
+  max-width: 1000px;
+  margin-top: 150px;
+  .right-col {
+    text-align: right;
+    .item-container {
+      text-align: center;
+    }
+  }
+}
