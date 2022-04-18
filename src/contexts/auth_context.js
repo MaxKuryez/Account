@@ -1,5 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { auth, firestore } from '../globals/firebase';
+import { auth, db } from '../globals/firebase';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 const AuthContext = React.createContext()
 
@@ -13,11 +16,6 @@ export function AuthProvider( {children} ) {
 
   function signup(email, password){
     return auth.createUserWithEmailAndPassword(email, password)
-    //.catch(function(err) {
-    //  const errorCode = err.code;
-    //  const errorMsg = err.message;
-    //  return err.message
-    //});
   }
 
   function login(email, password){
@@ -34,22 +32,17 @@ export function AuthProvider( {children} ) {
     let userEmail = user.user.multiFactor.user.email;
     let userID = user.user.multiFactor.user.uid;
 
-    const userTable = firestore.doc(`users/${userID}`);
-    const snapshot = await userTable.get();
+    const usersCollection = db.collection('users');
 
-    if (!snapshot) {
-      const {email} = userEmail;
-      const {uid} = userID;
-      try {
-        userTable.set({
-          email,
-          userID,
-          createdAt: new Date(),
-        });
-      } catch(error) {
-        console.log('Err when creating user', error);
-      }
-    }
+    const response = await usersCollection.add({
+      uid: userID,
+      email: userEmail,
+      createdAt: new Date(),
+    }).then(() => {
+      console.log('User added!');
+    }).catch(err => {
+      console.log('User not added!', err);
+    });
   }
 
   useEffect(() => {

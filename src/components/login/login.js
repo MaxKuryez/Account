@@ -27,12 +27,13 @@ function Login() {
     try {
       setError('');
       setLoading(true);
+
       let user = await signup(emailRef.current.value, passwordRef.current.value);
+
       createUserDocument(user);
       navigate('/account');
     } catch (error) {
-      setError('Account was not created.');
-      //error ? setError(error.message.replace(/Firebase: /,'')) : setError('Account was not created.');
+      error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not sign in.');
     }
 
     setLoading(false);
