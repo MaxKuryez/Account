@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { auth, db } from '../globals/firebase';
-import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
@@ -56,6 +55,7 @@ export function AuthProvider( {children} ) {
 
   const user = {
     currentUser,
+    loading,
     signup,
     login,
     logout,

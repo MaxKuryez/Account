@@ -1,10 +1,71 @@
 .account-container {
   max-width: 1000px;
   margin-top: 150px;
+  @media (max-width: 575px) {
+    margin-top: 50px;
+  }
+  .log-out {
+    text-align: right;
+    padding-right: 0;
+    .btn  {
+      margin-right: 10px;
+    }
+    @media (max-width: 575px) {
+      text-align: left;
+      padding: 0;
+    }
+  }
   .right-col {
     text-align: right;
     .item-container {
+      border: 1px solid rgba(0,0,0,.125);
+      border-radius: 0.25rem;
+      padding: 11px;
       text-align: center;
+      .add-item {
+        border-radius: 0 0 100px 100px;
+        width: 50%;
+        min-width: 125px;
+      }
+      .item-col {
+        text-align: left;
+        padding: 5px;
+        border-bottom: 1px solid rgba(0,0,0,.125);
+      }
+    }
+  }
+}
+
+#popup-root {
+  height: 0;
+  .popup-overlay {
+      background-color: #000000a3;
+  }
+  .popup-content {
+    margin: auto;
+    position: relative !important;
+    width: 20%;
+    min-width: 300px;
+    top: -200px !important;
+    left: 0 !important;
+    @media (max-width: 575px) {
+      top: -400px !important;
+    }
+    .item-header {
+      .x-btn {
+        color: #0b5ed7;
+        text-decoration: none;
+        font-weight: 600;
+        text-align: right;
+        display: inline-block;
+        width: 10%;
+        padding-right: 5px;
+        cursor: pointer;
+      }
+      .info {
+        display: inline-block;
+        width: 90%;
+      }
     }
   }
 }
