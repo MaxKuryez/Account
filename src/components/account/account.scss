@@ -1,8 +1,8 @@
 .account-container {
   max-width: 1000px;
-  margin-top: 150px;
+  margin: 80px 0 20px 0;
   @media (max-width: 575px) {
-    margin-top: 50px;
+    margin: 40px 0 40px 0;
   }
   .links-col {
     width: 40%;
@@ -65,9 +65,12 @@
           flex: 0 0 auto;
           width: 10%;
           color: green;
-          padding: 7px 0 0px 0;
+          padding: 7px 0 0 0;
           font-weight: 600;
           cursor: pointer;
+          @media (max-width: 860px) {
+            padding: 4px 0 0 0;
+          }
         }
       }
     }

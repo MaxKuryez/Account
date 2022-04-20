@@ -27,9 +27,8 @@ export function AuthProvider( {children} ) {
   }
 
   async function getItemsByUID(userID) {
-    const itemsCollection = await db.collection('items').where('uid', '==', userID);
+    const itemsCollection = db.collection('items').where('uid', '==', userID);
 
-    let tempDoc = [];
     return await itemsCollection.get().then((querySnapshot) => {
       const tempDoc = querySnapshot.docs.map((doc) => {
         return { id: doc.id, ...doc.data() }
@@ -39,7 +38,7 @@ export function AuthProvider( {children} ) {
   }
 
   async function setItemByUID(itemName, itemType, userID) {
-    const itemsCollection = await db.collection('items');
+    const itemsCollection = db.collection('items');
 
     const itemID = await itemsCollection.add({
       uid: userID,
@@ -56,7 +55,7 @@ export function AuthProvider( {children} ) {
   }
 
   async function deleteItemByID(itemID) {
-    const itemsDelete = await db.collection('items').doc(itemID);
+    const itemsDelete = db.collection('items').doc(itemID);
 
     if (!itemsDelete) return;
 
@@ -69,7 +68,14 @@ export function AuthProvider( {children} ) {
   }
 
   async function editItemByID(itemName, itemType, itemID) {
-    console.log(itemName, itemType, itemID);
+    const itemUpdate = db.collection('items').doc(itemID);
+
+    const response = await itemUpdate.update({name: itemName, type: itemType})
+    .then(() => {
+      console.log('Item updated!');
+    }).catch(err => {
+      console.log('Item not updated!', err);
+    });
   }
 
   async function createUserDocument(user){

@@ -22,7 +22,7 @@ export default function Account( props ) {
     }
 
     let itemName = itemNameRef.current.value;
-    let itemType = itemTypeRef.current.value
+    let itemType = itemTypeRef.current.value;
 
     try {
       setError('');
@@ -42,12 +42,30 @@ export default function Account( props ) {
   async function editItem(e, id){
     e.preventDefault();
 
+    let itemName = itemNameRef.current.value;
+    let itemType = itemTypeRef.current.value;
+
     if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current){
-      setError('Could not add item.');
+      setError('Could not edit item.');
       return;
     }
 
-    editItemByID(itemNameRef.current.value, itemTypeRef.current.value, id);
+    try {
+      setError('');
+
+      editItemByID(itemName, itemType, id);
+    } catch (error) {
+      error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not edit item.');
+    }
+
+    const itemsTmpl = items.map(item => {
+      if (item.id == id) {
+        return {...item, name: itemName, type: itemType};
+      }
+      return item;
+    });
+
+    setItems(itemsTmpl);
   }
 
   async function removeItem(e, id){
