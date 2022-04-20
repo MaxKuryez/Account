@@ -3,6 +3,7 @@ import { Card, Button, Alert, Form } from 'react-bootstrap';
 import { useAuth } from '../../../contexts/auth_context';
 import Popup from 'reactjs-popup';
 import EditIcon from './svg/edit';
+import RemoveIcon from './svg/file-x';
 import '../account.scss';
 
 export default function Account( props ) {
@@ -10,9 +11,9 @@ export default function Account( props ) {
   const [items, setItems] = useState([]);
   const itemNameRef = useRef();
   const itemTypeRef = useRef();
-  const { getItemsByUID, setItemByUID, deleteItemByID } = useAuth();
+  const { getItemsByUID, setItemByUID, deleteItemByID, editItemByID } = useAuth();
 
-  async function Additem(e) {
+  async function addItem(e) {
     e.preventDefault();
 
     if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current){
@@ -38,10 +39,23 @@ export default function Account( props ) {
     }
   }
 
+  async function editItem(e, id){
+    e.preventDefault();
+
+    if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current){
+      setError('Could not add item.');
+      return;
+    }
+
+    editItemByID(itemNameRef.current.value, itemTypeRef.current.value, id);
+  }
+
   async function removeItem(e, id){
     e.preventDefault();
 
     try {
+      setError('');
+
       await deleteItemByID(id);
     } catch {
       setError('Could not delete item.');
@@ -59,8 +73,9 @@ export default function Account( props ) {
   useEffect(() => {
     async function renderItems(){
       let userItems = await getItemsByUID(props.currentUser.uid);
-      userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0))
-      console.log(userItems)
+
+      userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
+
       setItems(userItems);
     }
 
@@ -79,7 +94,7 @@ export default function Account( props ) {
                   <h2 className='info'>Item Info</h2>
                   <h2 className='close x-btn ' onClick={close}>x</h2>
                 </div>
-                <Form onSubmit={(e) => { close(); Additem(e); }}>
+                <Form onSubmit={(e) => { close(); addItem(e); }}>
                   <Form.Group className='mt-3' id='name'>
                     <Form.Label>Name</Form.Label>
                     <Form.Control type='name' ref={itemNameRef} required/>
@@ -112,26 +127,26 @@ export default function Account( props ) {
                     <Card className='item-card'>
                       <Card.Body>
                         <div className='item-header'>
-                          <h2 className='info'>Item Info</h2>
+                          <h2 className='info'>Edit item</h2>
                           <h2 className='close x-btn ' onClick={close}>x</h2>
                         </div>
-                        <Form onSubmit={(e) => { close(); Additem(e); }}>
+                        <Form onSubmit={(e) => { close(); editItem(e, element.id); }}>
                           <Form.Group className='mt-3' id='name'>
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type='name' ref={itemNameRef} required/>
+                            <Form.Control type='name' ref={itemNameRef} defaultValue={element.name} required/>
                           </Form.Group>
                           <Form.Group className='mt-3' id='type'>
                             <Form.Label>Type</Form.Label>
-                            <Form.Control type='type' ref={itemTypeRef} required/>
+                            <Form.Control type='type' ref={itemTypeRef} defaultValue={element.type} required/>
                           </Form.Group>
-                          <Button className='close w-100 mt-4' type='submit'>Add Item</Button>
+                          <Button className='close w-100 mt-4' type='submit'>Save</Button>
                         </Form>
                       </Card.Body>
                     </Card>
                   </div>
                 )}
               </Popup>
-              <Popup trigger={<h3 className='item-delete'>x</h3>} position='center center'>
+              <Popup trigger={<h3 className='item-delete'><RemoveIcon /></h3>} position='center center'>
                 {close => (
                   <div>
                     <Card className='item-card'>

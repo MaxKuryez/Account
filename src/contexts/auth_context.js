@@ -68,6 +68,10 @@ export function AuthProvider( {children} ) {
     });
   }
 
+  async function editItemByID(itemName, itemType, itemID) {
+    console.log(itemName, itemType, itemID);
+  }
+
   async function createUserDocument(user){
     if (!user) {return};
 
@@ -91,7 +95,7 @@ export function AuthProvider( {children} ) {
     const unsubscribe = auth.onAuthStateChanged(user => {
       setCurrentUser(user);
       setLoading(false);
-    })
+  })
 
     return unsubscribe;
   }, []);
@@ -106,6 +110,7 @@ export function AuthProvider( {children} ) {
     getItemsByUID,
     setItemByUID,
     deleteItemByID,
+    editItemByID,
   }
 
   return (
