@@ -11,15 +11,19 @@ export default function Account( props ) {
   const [items, setItems] = useState([]);
   const itemNameRef = useRef();
   const itemTypeRef = useRef();
+  const itemImgRef = useRef();
   const { getItemsByUID, setItemByUID, deleteItemByID, editItemByID } = useAuth();
+  let ImgFileTmp = null;
 
   async function addItem(e) {
     e.preventDefault();
 
-    if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current){
+    if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current || !ImgFileTmp){
       setError('Could not add item.');
       return;
     }
+
+    console.log(ImgFileTmp);
 
     let itemName = itemNameRef.current.value;
     let itemType = itemTypeRef.current.value;
@@ -27,16 +31,20 @@ export default function Account( props ) {
     try {
       setError('');
 
-      await setItemByUID(itemName, itemType, props.currentUser.uid).then((itemID) => {
+      await setItemByUID(itemName, itemType, ImgFileTmp, props.currentUser.uid).then((item) => {
         setItems(items => [{
           name: itemName,
           type: itemType,
-          id: itemID
+          id: item.itemID,
+          imgUrl: item.imgUrl,
         }, ...items]);
+        console.log(items);
       });
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not add item.');
     }
+
+    ImgFileTmp = null;
   }
 
   async function editItem(e, id){
@@ -44,6 +52,7 @@ export default function Account( props ) {
 
     let itemName = itemNameRef.current.value;
     let itemType = itemTypeRef.current.value;
+    let imgUrl = '';
 
     if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current){
       setError('Could not edit item.');
@@ -53,19 +62,30 @@ export default function Account( props ) {
     try {
       setError('');
 
-      editItemByID(itemName, itemType, id);
+      imgUrl = await editItemByID(itemName, itemType, ImgFileTmp, id);
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not edit item.');
     }
 
-    const itemsTmpl = items.map(item => {
-      if (item.id == id) {
-        return {...item, name: itemName, type: itemType};
-      }
-      return item;
-    });
+    if (imgUrl) {
+      const itemsTmpl = items.map(item => {
+        if (item.id == id) {
+          return {...item, name: itemName, type: itemType, imgUrl: imgUrl};
+        }
+        return item;
+      });
 
-    setItems(itemsTmpl);
+      setItems(itemsTmpl);
+    } else {
+      const itemsTmpl = items.map(item => {
+        if (item.id == id) {
+          return {...item, name: itemName, type: itemType};
+        }
+        return item;
+      });
+
+      setItems(itemsTmpl);
+    }
   }
 
   async function removeItem(e, id){
@@ -86,6 +106,10 @@ export default function Account( props ) {
     }), 1);
 
     setItems(itemsTmpl);
+  }
+
+  function  loadFile(e) {
+    ImgFileTmp = e.target.files[0];
   }
 
   useEffect(() => {
@@ -121,6 +145,10 @@ export default function Account( props ) {
                     <Form.Label>Type</Form.Label>
                     <Form.Control type='type' ref={itemTypeRef} required/>
                   </Form.Group>
+                  <Form.Group className='mt-3' id='img'>
+                    <Form.Label>Image</Form.Label>
+                    <Form.Control type='file' onChange={loadFile} ref={itemImgRef} accept='image/*' required/>
+                  </Form.Group>
                   <Button className='close w-100 mt-4' type='submit'>Add Item</Button>
                 </Form>
               </Card.Body>
@@ -130,13 +158,13 @@ export default function Account( props ) {
       </Popup>
       {error && <Alert variant='danger'>{error}</Alert>}
       {items && items.length ?
-        <><div>
+        <><div className='items-table'>
           <div className='row item-col mb-2'>
             <div className='item-name item-element'>Item:</div>
             <div className='item-price item-element'>Type:</div>
           </div>
           {items.map((element, it) => {
-            return (<div className='row item-col' id={element.id} key={it}>
+            return (<div key={it}><div className='item-img'><img src={element.imgUrl}></img></div><div className='row item-col' id={element.id}>
               <div className='item-name item-element'>{element.name}</div>
               <div className='item-price item-element'>{element.type}</div>
               <Popup trigger={<div className='edit-item'><EditIcon/></div>} position='center center'>
@@ -156,6 +184,10 @@ export default function Account( props ) {
                           <Form.Group className='mt-3' id='type'>
                             <Form.Label>Type</Form.Label>
                             <Form.Control type='type' ref={itemTypeRef} defaultValue={element.type} required/>
+                          </Form.Group>
+                          <Form.Group className='mt-3' id='img'>
+                            <Form.Label>Image</Form.Label>
+                            <Form.Control type='file' onChange={loadFile} ref={itemImgRef} accept='image/*'/>
                           </Form.Group>
                           <Button className='close w-100 mt-4' type='submit'>Save</Button>
                         </Form>
@@ -184,7 +216,7 @@ export default function Account( props ) {
                   </div>
                 )}
               </Popup>
-            </div>);
+            </div></div>);
           })}
         </div></> :
         <><div className='mb-3'>You do not have any items, please add some.</div></>}

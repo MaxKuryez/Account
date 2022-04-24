@@ -4,6 +4,7 @@ import { AuthProvider } from '../contexts/auth_context';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Account from '../components/account/account';
 import SignIn from '../components/signin/signin';
+import Home from '../components/homepage/homepage';
 
 function Routing() {
 
@@ -12,6 +13,7 @@ return (
       <Router>
         <AuthProvider>
           <Routes>
+            <Route path='/' element={<HomePage />} />
             <Route path='/signup' element={<LoginPage />} />
             <Route path='/account' element={<AccountPage />} />
             <Route path='/signin' element={<SignInPage />} />
@@ -69,6 +71,14 @@ function ProfilePage() {
   return (
     <div>
       <Account/>
+    </div>
+  );
+}
+
+function HomePage() {
+  return (
+    <div>
+      <Home/>
     </div>
   );
 }

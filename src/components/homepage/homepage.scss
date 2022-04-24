@@ -1,0 +1,17 @@
+.gnav-container {
+  text-align: right;
+  margin: 20px 0% 0% 10%;
+  max-width: 400px;
+  display: flex;
+  .search-form {
+    max-width: 300px;
+    min-width: 200px;
+    display: inline-block;
+  }
+  .sign-in {
+    display: inline-block;
+    margin-left: 20px;
+    margin-right: 35px;
+    min-width: 50px;
+  }
+}
