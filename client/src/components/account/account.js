@@ -12,6 +12,14 @@ export default function Account() {
 
   useEffect(() => {
     !currentUser && navigate('/signin');
+
+    fetch('/api/todos').then(
+      res => res.json()
+    ).then(
+      data => {
+        console.log(data);
+      }
+    );
   }, []);
 
   async function HandleLogout() {
