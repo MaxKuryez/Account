@@ -13,7 +13,14 @@ export default function Account() {
   useEffect(() => {
     !currentUser && navigate('/signin');
 
-    fetch('/api/todos').then(
+    fetch('/user/signin', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        email: 'asd@asd.lom',
+        password: 'passwordddd'
+      })
+    }).then(
       res => res.json()
     ).then(
       data => {
