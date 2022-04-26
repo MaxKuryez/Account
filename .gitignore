@@ -3,6 +3,7 @@
 # dependencies
 /client/node_modules
 /server/node_modules
+/server/config/firebase-key.json
 /.pnp
 .pnp.js
 

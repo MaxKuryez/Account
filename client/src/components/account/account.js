@@ -13,12 +13,12 @@ export default function Account() {
   useEffect(() => {
     !currentUser && navigate('/signin');
 
-    fetch('/user/signin', {
+    fetch('/login', {
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
       body: JSON.stringify({
-        email: 'asd@asd.lom',
-        password: 'passwordddd'
+        email: 'test@test.com',
+        password: 'asdasd'
       })
     }).then(
       res => res.json()
