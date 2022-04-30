@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Form, Button, Card, Alert } from 'react-bootstrap'
 import { useAuth } from '../../contexts/auth_context';
 import { Link, useNavigate } from 'react-router-dom';
-import './login.scss';
+import './signup.scss';
 
 function Login() {
   const emailRef = useRef();

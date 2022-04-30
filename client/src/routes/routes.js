@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import Login from '../components/login/login';
+import Login from '../components/signup/signup';
 import { AuthProvider } from '../contexts/auth_context';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Account from '../components/account/account';

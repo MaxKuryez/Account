@@ -4,33 +4,57 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-const AuthContext = React.createContext()
+const AuthContext = React.createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
 }
 
 export function AuthProvider( {children} ) {
-  const [currentUser, setCurrentUser] = useState();
-  const [loading, setLoading] = useState(true);
+  const userStored = typeof localStorage.getItem('user') === 'string' && localStorage.getItem('user') !== '' ?
+  JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
+  const [currentUser, setCurrentUser] = useState( userStored ? userStored : 0 );
+  const [loading, setLoading] = useState(false);
 
   function signup(email, password){
-    return auth.createUserWithEmailAndPassword(email, password)
+    return auth.createUserWithEmailAndPassword(email, password);
   }
 
-  function login(email, password){
-    return auth.signInWithEmailAndPassword(email, password)
+  async function signin(email, password){
+    return fetch('/account/signin', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    }).then(async response => {
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await response.json() : null;
+        if (!response.ok) {
+            setCurrentUser(0);
+            throw new Error(data);
+        } else {
+          setCurrentUser(data);
+        }
+        setLoading(false);
+    });
   }
 
   function logout() {
-    return auth.signOut();
+    //return auth.signOut();
+    localStorage.setItem('user', 0);
+    setCurrentUser('');
   }
 
   async function getItemsByUID(userID) {
+    console.log('testing user id: ' + userID);
     const itemsCollection = db.collection('items').where('uid', '==', userID);
-
+    console.log('here'); 
     return await itemsCollection.get().then((querySnapshot) => {
+      console.log('and heree: ' + querySnapshot);  
       const tempDoc = querySnapshot.docs.map((doc) => {
+        console.log('and here: ' + doc);  
         return { id: doc.id, ...doc.data() }
       });
       return tempDoc;
@@ -148,19 +172,14 @@ export function AuthProvider( {children} ) {
   }
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
-      setLoading(false);
-  })
-
-    return unsubscribe;
-  }, []);
+    localStorage.setItem('user', JSON.stringify(currentUser));
+  }, [currentUser]);
 
   const user = {
     currentUser,
     loading,
     signup,
-    login,
+    signin,
     logout,
     createUserDocument,
     getItemsByUID,

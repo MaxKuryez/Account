@@ -7,7 +7,7 @@ import './signin.scss';
 function Account() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { login, currentUser } = useAuth();
+  const { signin, currentUser } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ function Account() {
     try {
       setError('');
       setLoading(true);
-      await login(emailRef.current.value, passwordRef.current.value);
+      await signin(emailRef.current.value, passwordRef.current.value);
       navigate('/account');
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not sign in.');

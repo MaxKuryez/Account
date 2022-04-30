@@ -114,7 +114,14 @@ export default function Account( props ) {
 
   useEffect(() => {
     async function renderItems(){
-      let userItems = await getItemsByUID(props.currentUser.uid);
+      const userStored = typeof localStorage.getItem('user') === 'string' ? JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
+      console.log('test items ' + userStored);
+      if (!userStored) {
+        return;
+      }
+      let userItems = await getItemsByUID(userStored.uid);
+
+      console.log(userItems);
 
       userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
 
