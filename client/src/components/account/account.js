@@ -12,23 +12,6 @@ export default function Account() {
 
   useEffect(() => {
     !currentUser && navigate('/signin');
-
-    console.log('user in account:' + currentUser);
-
-    //fetch('/login', {
-    //  headers: { 'Content-Type': 'application/json' },
-    //  method: 'POST',
-    //  body: JSON.stringify({
-    //    email: 'test@test.com',
-    //    password: 'asdasd'
-    //  })
-    //}).then(
-    //  res => res.json()
-    //).then(
-    //  data => {
-    //    console.log(data);
-    //  }
-    //);
   }, []);
 
   async function HandleLogout() {

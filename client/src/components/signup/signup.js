@@ -8,7 +8,7 @@ function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup, currentUser, createUserDocument } = useAuth();
+  const { signup, currentUser } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,10 +27,8 @@ function Login() {
     try {
       setError('');
       setLoading(true);
+      await signup(emailRef.current.value, passwordRef.current.value);
 
-      let user = await signup(emailRef.current.value, passwordRef.current.value);
-
-      createUserDocument(user);
       navigate('/account');
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not sign in.');

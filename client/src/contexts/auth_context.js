@@ -17,7 +17,25 @@ export function AuthProvider( {children} ) {
   const [loading, setLoading] = useState(false);
 
   function signup(email, password){
-    return auth.createUserWithEmailAndPassword(email, password);
+    return fetch('/account/signup', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          setCurrentUser(0);
+          setLoading(false);
+          throw new Error(data);
+      } else {
+        setCurrentUser(data);
+      }
+      setLoading(false);
+    });
   }
 
   async function signin(email, password){
@@ -29,35 +47,39 @@ export function AuthProvider( {children} ) {
         password: password
       })
     }).then(async response => {
-        const isJson = response.headers.get('content-type')?.includes('application/json');
-        const data = isJson ? await response.json() : null;
-        if (!response.ok) {
-            setCurrentUser(0);
-            throw new Error(data);
-        } else {
-          setCurrentUser(data);
-        }
-        setLoading(false);
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          setCurrentUser(0);
+          setLoading(false);
+          throw new Error(data);
+      } else {
+        setCurrentUser(data);
+      }
+      setLoading(false);
     });
   }
 
   function logout() {
-    //return auth.signOut();
     localStorage.setItem('user', 0);
     setCurrentUser('');
   }
 
   async function getItemsByUID(userID) {
-    console.log('testing user id: ' + userID);
-    const itemsCollection = db.collection('items').where('uid', '==', userID);
-    console.log('here'); 
-    return await itemsCollection.get().then((querySnapshot) => {
-      console.log('and heree: ' + querySnapshot);  
-      const tempDoc = querySnapshot.docs.map((doc) => {
-        console.log('and here: ' + doc);  
-        return { id: doc.id, ...doc.data() }
-      });
-      return tempDoc;
+    return fetch('/items/get', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        userID: userID,
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
     });
   }
 
@@ -99,15 +121,20 @@ export function AuthProvider( {children} ) {
   }
 
   async function deleteItemByID(itemID) {
-    const itemsDelete = db.collection('items').doc(itemID);
-
-    if (!itemsDelete) return;
-
-    const response = await itemsDelete.get()
-    .then((doc) => {
-      doc.ref.delete();
-    }).catch(err => {
-      console.log('Could not delete item!', err);
+    return fetch('/items/delete', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        itemID: itemID,
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
     });
   }
 
@@ -152,25 +179,6 @@ export function AuthProvider( {children} ) {
     }
   }
 
-  async function createUserDocument(user){
-    if (!user) {return};
-
-    let userEmail = user.user.multiFactor.user.email;
-    let userID = user.user.multiFactor.user.uid;
-
-    const usersCollection = db.collection('users');
-
-    const response = await usersCollection.add({
-      uid: userID,
-      email: userEmail,
-      createdAt: new Date(),
-    }).then(() => {
-      console.log('User added!');
-    }).catch(err => {
-      console.log('User not added!', err);
-    });
-  }
-
   useEffect(() => {
     localStorage.setItem('user', JSON.stringify(currentUser));
   }, [currentUser]);
@@ -181,7 +189,6 @@ export function AuthProvider( {children} ) {
     signup,
     signin,
     logout,
-    createUserDocument,
     getItemsByUID,
     setItemByUID,
     deleteItemByID,

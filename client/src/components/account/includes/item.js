@@ -23,8 +23,6 @@ export default function Account( props ) {
       return;
     }
 
-    console.log(ImgFileTmp);
-
     let itemName = itemNameRef.current.value;
     let itemType = itemTypeRef.current.value;
 
@@ -38,7 +36,6 @@ export default function Account( props ) {
           id: item.itemID,
           imgUrl: item.imgUrl,
         }, ...items]);
-        console.log(items);
       });
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not add item.');
@@ -93,41 +90,36 @@ export default function Account( props ) {
 
     try {
       setError('');
-
-      await deleteItemByID(id);
+      await deleteItemByID(id).then(() => {
+        renderItems();
+      });
     } catch {
       setError('Could not delete item.');
     }
-
-    let itemsTmpl = [...items];
-
-    itemsTmpl.splice(itemsTmpl.findIndex((item) => {
-      return item.id == id;
-    }), 1);
-
-    setItems(itemsTmpl);
   }
 
   function  loadFile(e) {
     ImgFileTmp = e.target.files[0];
   }
 
-  useEffect(() => {
-    async function renderItems(){
-      const userStored = typeof localStorage.getItem('user') === 'string' ? JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
-      console.log('test items ' + userStored);
-      if (!userStored) {
-        return;
+  async function renderItems(){
+      const userStoredItem = typeof localStorage.getItem('user') === 'string' ?
+      JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
+
+      if (userStoredItem) {
+        try {
+          setError('');
+          let userItems = await getItemsByUID(userStoredItem.uid);
+
+          userItems && userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
+          setItems(userItems);
+        } catch (error) {
+          error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not load items.');
+        }
       }
-      let userItems = await getItemsByUID(userStored.uid);
-
-      console.log(userItems);
-
-      userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
-
-      setItems(userItems);
     }
 
+  useEffect(() => {
     renderItems();
   }, []);
 
