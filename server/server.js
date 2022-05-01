@@ -1,11 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const firebase = require('./config/firebase');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 const port = 5000;
 
 app.use(bodyParser.json());
+app.use(express.json({limit: '50mb'}));
+app.use(fileUpload());
 
 app.post('/account/signin', async (req, res) => {
   const { email, password } = req.body;
@@ -14,7 +17,7 @@ app.post('/account/signin', async (req, res) => {
   } else {
     await firebase.app.auth().signInWithEmailAndPassword(email, password).then(async user => {
       if (user) {
-        let user = await firebase.app.auth().currentUser;
+        const user = await firebase.app.auth().currentUser;
         await firebase.db.collection('users').where('uid', '==', user.uid).get().then((querySnapshot) => {
           querySnapshot.docs.map((doc) => {
             const userLogin = {
@@ -43,7 +46,7 @@ app.post('/account/signup', async (req, res) => {
   } else {
     await firebase.app.auth().createUserWithEmailAndPassword(email, password).then(async user => {
       if (user) {
-        let user = await firebase.app.auth().currentUser;
+        const user = await firebase.app.auth().currentUser;
         await firebase.db.collection('users').add({
           uid: user.uid,
           email: user.email,
@@ -83,6 +86,56 @@ app.post('/items/get', async (req, res) => {
   }
 });
 
+app.post('/items/edit', async (req, res) => {
+  if (!req.body.item || !req.files.file) {
+    return res.status(400).json('Not all data provided');
+  }
+  req.body.item = JSON.parse(req.body.item);
+  const { itemName, itemType, itemID } = req.body.item;
+  const itemImg = req.files.file;
+
+  if (!itemID || !itemName || !itemType) {
+    return res.status(400).json('Not all data provided');
+  } else {
+    if (itemImg) {
+      const fileRef = firebase.storage.child(itemImg.name);
+
+      await fileRef.put(itemImg.data).then(() => {
+      })
+      .catch(err => {
+        return res.status(400).json(err.message);
+      });
+
+      const imgUrl = await fileRef.getDownloadURL().then((url) => {
+        return url;
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+
+      await firebase.db.collection('items').doc(itemID).update({name: itemName, type: itemType, imgUrl: imgUrl}).then(( data ) => {
+        const ItemUpdated = {
+          id: itemID,
+          updated: true
+        }
+        res.json(ItemUpdated);
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+    } else {
+      await firebase.db.collection('items').doc(itemID).update({name: itemName, type: itemType}).then((data) => {
+        const ItemUpdated = {
+          id: itemID,
+          updated: true
+        }
+        res.json(ItemUpdated);
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+    }
+    
+  }
+});
+
 app.post('/items/delete', async (req, res) => {
   const { itemID } = req.body;
   if (!itemID) {
@@ -90,11 +143,11 @@ app.post('/items/delete', async (req, res) => {
   } else {
     await firebase.db.collection('items').doc(itemID).get().then((querySnapshot) => {
       querySnapshot.ref.delete();
-      const tempItemDeleted = {
+      const ItemDeleted = {
         id: itemID,
         deleted: true
       }
-      return res.json(tempItemDeleted);
+      return res.json(ItemDeleted);
     }).catch(err => {
       return res.status(400).json(err.message);
     });

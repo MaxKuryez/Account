@@ -139,44 +139,26 @@ export function AuthProvider( {children} ) {
   }
 
   async function editItemByID(itemName, itemType, itemImg, itemID) {
-    const itemUpdate = db.collection('items').doc(itemID);
+    let data = new FormData();
+    data.append('file', itemImg)
+    data.append('item', JSON.stringify({
+      itemName: itemName,
+      itemType: itemType,
+      itemID: itemID,
+    }));
 
-    if (itemImg) {
-      const fileRef = storage.child(itemImg.name);
-
-      await fileRef.put(itemImg)
-      .then(() => {
-        console.log('Image added');
-      }).catch(err => {
-        console.log('Image not added!', err);
-      });
-  
-      let imgUrl = await fileRef.getDownloadURL()
-      .then((url) => {
-        console.log('Url returned.');
-        return url;
-      }).catch(err => {
-        console.log('Url not returned.', err);
-      });;
-
-      const response = await itemUpdate.update({name: itemName, type: itemType, imgUrl: imgUrl})
-      .then(() => {
-        console.log('Item updated with img!');
-      }).catch(err => {
-        console.log('Item not updated with img!', err);
-      });
-
-      return imgUrl;
-    } else {
-      const response = await itemUpdate.update({name: itemName, type: itemType})
-      .then(() => {
-        console.log('Item updated!');
-      }).catch(err => {
-        console.log('Item not updated!', err);
-      });
-
-      return '';
-    }
+    return fetch('/items/edit', {
+      method: 'POST',
+      body: data
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
+    });
   }
 
   useEffect(() => {

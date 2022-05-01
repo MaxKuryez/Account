@@ -49,7 +49,6 @@ export default function Account( props ) {
 
     let itemName = itemNameRef.current.value;
     let itemType = itemTypeRef.current.value;
-    let imgUrl = '';
 
     if ( !itemNameRef || !itemTypeRef || !itemNameRef.current || !itemTypeRef.current){
       setError('Could not edit item.');
@@ -59,29 +58,11 @@ export default function Account( props ) {
     try {
       setError('');
 
-      imgUrl = await editItemByID(itemName, itemType, ImgFileTmp, id);
+      await editItemByID(itemName, itemType, ImgFileTmp, id).then(() => {
+        renderItems();
+      });
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not edit item.');
-    }
-
-    if (imgUrl) {
-      const itemsTmpl = items.map(item => {
-        if (item.id == id) {
-          return {...item, name: itemName, type: itemType, imgUrl: imgUrl};
-        }
-        return item;
-      });
-
-      setItems(itemsTmpl);
-    } else {
-      const itemsTmpl = items.map(item => {
-        if (item.id == id) {
-          return {...item, name: itemName, type: itemType};
-        }
-        return item;
-      });
-
-      setItems(itemsTmpl);
     }
   }
 
