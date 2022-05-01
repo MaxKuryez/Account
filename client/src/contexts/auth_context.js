@@ -1,8 +1,4 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { auth, db, app, storage } from '../globals/firebase';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
-import { collection, query, where, getDocs } from "firebase/firestore";
 
 const AuthContext = React.createContext();
 
@@ -84,40 +80,26 @@ export function AuthProvider( {children} ) {
   }
 
   async function setItemByUID(itemName, itemType, itemImg, userID) {
-    const itemsCollection = db.collection('items');
-    const fileRef = storage.child(itemImg.name);
-    const item = {};
+    let data = new FormData();
+    data.append('file', itemImg)
+    data.append('item', JSON.stringify({
+      itemName: itemName,
+      itemType: itemType,
+      userID: userID
+    }));
 
-    await fileRef.put(itemImg)
-    .then(() => {
-      console.log('Image added');
-    }).catch(err => {
-      console.log('Image not added!', err);
+    return fetch('/items/add', {
+      method: 'POST',
+      body: data
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
     });
-
-    item.imgUrl = await fileRef.getDownloadURL()
-    .then((url) => {
-      console.log('Url returned.');
-      return url;
-    }).catch(err => {
-      console.log('Url not returned.', err);
-    });;
-
-    console.log(item.imgUrl);
-
-    item.itemID = await itemsCollection.add({
-      uid: userID,
-      type: itemType,
-      name: itemName,
-      imgUrl: item.imgUrl,
-      createdAt: new Date().getTime(),
-    }).then((docRef) => {
-      return docRef.id;
-    }).catch(err => {
-      console.log('Item not added!', err);
-    });
-
-    return item;
   }
 
   async function deleteItemByID(itemID) {
@@ -140,7 +122,7 @@ export function AuthProvider( {children} ) {
 
   async function editItemByID(itemName, itemType, itemImg, itemID) {
     let data = new FormData();
-    data.append('file', itemImg)
+    itemImg && data.append('file', itemImg)
     data.append('item', JSON.stringify({
       itemName: itemName,
       itemType: itemType,

@@ -28,14 +28,8 @@ export default function Account( props ) {
 
     try {
       setError('');
-
-      await setItemByUID(itemName, itemType, ImgFileTmp, props.currentUser.uid).then((item) => {
-        setItems(items => [{
-          name: itemName,
-          type: itemType,
-          id: item.itemID,
-          imgUrl: item.imgUrl,
-        }, ...items]);
+      await setItemByUID(itemName, itemType, ImgFileTmp, props.currentUser.uid).then(() => {
+        renderItems();
       });
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not add item.');
@@ -57,7 +51,6 @@ export default function Account( props ) {
 
     try {
       setError('');
-
       await editItemByID(itemName, itemType, ImgFileTmp, id).then(() => {
         renderItems();
       });
@@ -84,21 +77,20 @@ export default function Account( props ) {
   }
 
   async function renderItems(){
-      const userStoredItem = typeof localStorage.getItem('user') === 'string' ?
-      JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
+    const userStoredItem = typeof localStorage.getItem('user') === 'string' ?
+    JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
 
-      if (userStoredItem) {
-        try {
-          setError('');
-          let userItems = await getItemsByUID(userStoredItem.uid);
-
-          userItems && userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
-          setItems(userItems);
-        } catch (error) {
-          error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not load items.');
-        }
+    if (userStoredItem) {
+      try {
+        setError('');
+        let userItems = await getItemsByUID(userStoredItem.uid);
+        userItems && userItems.sort((b,a) => (a.createdAt > b.createdAt) ? 1 : ((b.createdAt > a.createdAt) ? -1 : 0));
+        setItems(userItems);
+      } catch (error) {
+        error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not load items.');
       }
     }
+  }
 
   useEffect(() => {
     renderItems();

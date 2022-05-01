@@ -86,13 +86,56 @@ app.post('/items/get', async (req, res) => {
   }
 });
 
+app.post('/items/add', async (req, res) => {
+  if (!req.body.item) {
+    return res.status(400).json('Not all data provided');
+  }
+  req.body.item = JSON.parse(req.body.item);
+  const { itemName, itemType, userID } = req.body.item;
+  const itemImg = req.files && req.files.file || 0;
+
+  if (!userID || !itemName || !itemType) {
+    return res.status(400).json('Not all data provided');
+  } else {
+    if (itemImg) {
+      const fileRef = firebase.storage.child(itemImg.name);
+
+      await fileRef.put(itemImg.data).then(() => {
+      })
+      .catch(err => {
+        return res.status(400).json(err.message);
+      });
+
+      const imgUrl = await fileRef.getDownloadURL().then((url) => {
+        return url;
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+
+      const ItemAdded = {
+        uid: userID,
+        type: itemType,
+        name: itemName,
+        imgUrl: imgUrl,
+        createdAt: new Date().getTime(),
+      }
+
+      await firebase.db.collection('items').add(ItemAdded).then(() => {
+        return res.json(ItemAdded);
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+    }
+  }
+});
+
 app.post('/items/edit', async (req, res) => {
-  if (!req.body.item || !req.files.file) {
+  if (!req.body.item) {
     return res.status(400).json('Not all data provided');
   }
   req.body.item = JSON.parse(req.body.item);
   const { itemName, itemType, itemID } = req.body.item;
-  const itemImg = req.files.file;
+  const itemImg = req.files && req.files.file || 0;
 
   if (!itemID || !itemName || !itemType) {
     return res.status(400).json('Not all data provided');
