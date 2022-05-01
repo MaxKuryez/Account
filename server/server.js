@@ -197,6 +197,17 @@ app.post('/items/delete', async (req, res) => {
   }
 });
 
+app.post('/items/search', async (req, res) => {
+  await firebase.db.collection('items').where('uid', '!=', '').get().then((querySnapshot) => {
+        const tempDoc = querySnapshot.docs.map((doc) => {
+          return { id: doc.id, ...doc.data() }
+        });
+        res.json(tempDoc);
+  }).catch(err => {
+    return res.status(400).json(err.message);
+  });
+});
+
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
 });
