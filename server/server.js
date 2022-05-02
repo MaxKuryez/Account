@@ -198,11 +198,22 @@ app.post('/items/delete', async (req, res) => {
 });
 
 app.post('/items/search', async (req, res) => {
+  let { search } = req.body;
   await firebase.db.collection('items').where('uid', '!=', '').get().then((querySnapshot) => {
         const tempDoc = querySnapshot.docs.map((doc) => {
           return { id: doc.id, ...doc.data() }
         });
-        res.json(tempDoc);
+        let respItems = [];
+        tempDoc.map(item => {
+          while (search.charAt(0) === ' ') {
+            search = search.substring(1);
+          }
+          if (item && typeof item.name === 'string' && item.name.toLowerCase().includes(search.toLowerCase())) {
+            item.label = item.name;
+            respItems.push(item);
+          }
+        });
+        res.json(respItems);
   }).catch(err => {
     return res.status(400).json(err.message);
   });
