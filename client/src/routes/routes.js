@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Account from '../components/account/account';
 import SignIn from '../components/signin/signin';
 import Home from '../components/homepage/homepage';
+import SearchPage from '../components/search_page/search_page'
 
 function Routing() {
 
@@ -20,6 +21,7 @@ return (
             <Route path='/address' element={<AddressPage />} />
             <Route path='/rented-items' element={<RentPage />} />
             <Route path='/profile-preferences' element={<ProfilePage />} />
+            <Route path='/search' element={<SearchPageElement />} />
           </Routes>
         </AuthProvider>
       </Router>
@@ -79,6 +81,14 @@ function HomePage() {
   return (
     <div>
       <Home/>
+    </div>
+  );
+}
+
+function SearchPageElement() {
+  return (
+    <div>
+      <SearchPage/>
     </div>
   );
 }

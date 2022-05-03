@@ -3,12 +3,17 @@ import TextField from '@mui/material/TextField';
 import { styled } from "@mui/material/styles";
 import Autocomplete from '@mui/material/Autocomplete';
 import { FormControl, Button, Form } from 'react-bootstrap';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Search() {
   const [search, setSearch] = useState('');
   const [items, setItems] = useState([]);
+  const navigate = useNavigate();
+  const searchDom = useLocation().search;
+  const query = new URLSearchParams(searchDom).get('query') || '';
 
   async function getSearchedItems() {
+    if (!search) {return;}
     fetch('/items/search', {
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
@@ -21,26 +26,28 @@ function Search() {
       if (!response.ok) {
           throw new Error(data);
       } else {
-        setItems(data);
+        setItems(data.slice(0,7));
       }
     });
   }
 
+  async function handleKeyPress(event, selectedSearch) {
+    event.preventDefault();
+    setSearch(selectedSearch);
+    if (!selectedSearch) {
+      navigate('/search?query=' + search);
+    } else {
+      navigate('/search?query=' + selectedSearch);
+    }
+  }
+
   useEffect(() => {
-    console.log('render');
-    if (search.trim().length !== 0) {
+    if (!search || search.trim().length !== 0) {
       getSearchedItems();
     } else {
       setItems([]);
     }
   }, [search]);
-
-  const Input = styled('input')(({ theme }) => ({
-    height: 100,
-    width: 200,
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.getContrastText(theme.palette.background.paper)
-  }));
 
   return(
     <Form className='d-flex search-form'>
@@ -48,15 +55,32 @@ function Search() {
         disablePortal
         freeSolo
         id='combo-box-demo'
+        defaultValue={query}
+        value={query}
         onInputChange={(event, newInputValue) => {
+          if (newInputValue && newInputValue) {
+            newInputValue = newInputValue.trimStart();
+          }
           setSearch(newInputValue);
         }}
         filterOptions={(x) => x}
+        onChange={(event, newInputValue) => {
+          if (newInputValue) {
+            handleKeyPress(event, newInputValue.label);
+          }
+        }}
+        onKeyPress={(event, newInputValue) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            if (newInputValue && newInputValue.label) {
+              handleKeyPress(event, newInputValue.label);
+            }
+          }
+        }}
         options={items}
         sx={{ width: 400 }}
         renderInput={(params) => <TextField {...params} label='Search' size='small'/>}
       />
-      <Button>Search</Button>
     </Form>
   );
 }
