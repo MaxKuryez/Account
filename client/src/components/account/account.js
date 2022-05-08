@@ -3,11 +3,12 @@ import { Card, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth_context';
 import Item from './includes/item';
+import Address from './includes/address';
 import './account.scss';
 
-export default function Account() {
+export default function Account( props ) {
   const [error, setError] = useState('');
-  const { currentUser, logout, setItemsByUID } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +22,17 @@ export default function Account() {
       navigate('/signin');
     } catch {
       setError('Could not log out.');
+    }
+  }
+
+  function renderAccountSection( section ) {
+    switch(section) {
+      case 'item':
+        return (<><Item currentUser={currentUser}/></>);
+      case 'address':
+        return (<><Address currentUser={currentUser}/></>);
+      default:
+        return (<><Item currentUser={currentUser}/></>);
     }
   }
 
@@ -38,12 +50,12 @@ export default function Account() {
           </div>
           <div className='row'>
             <div className='col-sm-6 links-col'>
-              <Link to='/profile-preferences' className='btn btn-primary w-75 mt-5'>Profile</Link>
-              <Link to='/address' className='btn btn-primary w-75 mt-2'>My Address</Link>
-              <Link to='/rented-items' className='btn btn-primary w-75 mt-2'>Rented Items</Link>
+              <Link to='/account/profile-preferences' className='btn btn-primary w-75 mt-5'>My Items</Link>
+              <Link to='/account/address' className='btn btn-primary w-75 mt-2'>My Address</Link>
+              <Link to='/account/rented-items' className='btn btn-primary w-75 mt-2'>Rented Items</Link>
             </div>
             <div className='col-sm-6 right-col mb-1'>
-              <Item currentUser={currentUser}/>
+              {renderAccountSection(props.section)}
             </div>
           </div>
         </Card.Body>

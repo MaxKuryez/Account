@@ -12,7 +12,7 @@ app.use(fileUpload());
 
 app.post('/account/signin', async (req, res) => {
   const { email, password } = req.body;
-  if (!email && !password) {
+  if (!email || !password) {
     return res.status(400).json('Please fill the required inputs before logging in!');
   } else {
     await firebase.app.auth().signInWithEmailAndPassword(email, password).then(async user => {
@@ -217,6 +217,64 @@ app.post('/items/search', async (req, res) => {
   }).catch(err => {
     return res.status(400).json(err.message);
   });
+});
+
+app.post('/address/add', async (req, res) => {
+  const { name, surname, street, uid, phone, postal } = req.body;
+  if (!name) {
+    return res.status(400).json('Please provide name!');
+  }
+  if (!surname) {
+    return res.status(400).json('Please provide surname!');
+  }
+  if (!uid) {
+    return res.status(400).json('Something went wrong!');
+  }
+  if (!street) {
+    return res.status(400).json('Provide the street!');
+  }
+  if (!phone) {
+    return res.status(400).json('Provide the phone!');
+  }
+  if ( !/^\d+$/.test(phone) || phone.length < 9 || phone.length > 11) {
+    return res.status(400).json('Provide the phone number between 9 and 11 digits!');
+  }
+  if (!postal) {
+    return res.status(400).json('Provide the postal code!');
+  }
+  if ( !/^\d+$/.test(postal) || postal.length < 5 || postal.length > 6) {
+    return res.status(400).json('Provide the phone postal code between 5 and 6 digits!');
+  }
+  const adddressAdded = {
+    name: name,
+    surname: surname,
+    uid: uid,
+    street: street,
+    phone: phone,
+    postal: postal,
+    createdAt: new Date().getTime(),
+  }
+  await firebase.db.collection('addresses').add(adddressAdded).then(() => {
+    return res.json(adddressAdded);
+  }).catch(err => {
+    return res.status(400).json(err.message);
+  });
+});
+
+app.post('/address/get', async (req, res) => {
+  const { userID } = req.body;
+  if (!userID) {
+    return res.status(400).json('Address is empty');
+  } else {
+    await firebase.db.collection('addresses').where('uid', '==', userID).get().then((querySnapshot) => {
+          const tempDoc = querySnapshot.docs.map((doc) => {
+            return { id: doc.id, ...doc.data() }
+          });
+          res.json(tempDoc);
+    }).catch(err => {
+      return res.status(400).json(err.message);
+    });
+  }
 });
 
 app.listen(port, () => {

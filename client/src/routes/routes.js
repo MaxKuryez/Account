@@ -16,11 +16,11 @@ return (
           <Routes>
             <Route path='/' element={<HomePage />} />
             <Route path='/signup' element={<LoginPage />} />
-            <Route path='/account' element={<AccountPage />} />
+            <Route path='/account/items' element={<AccountPage />} />
             <Route path='/signin' element={<SignInPage />} />
-            <Route path='/address' element={<AddressPage />} />
-            <Route path='/rented-items' element={<RentPage />} />
-            <Route path='/profile-preferences' element={<ProfilePage />} />
+            <Route path='/account/address' element={<AddressPage />} />
+            <Route path='/account/rented-items' element={<RentPage />} />
+            <Route path='/account/profile-preferences' element={<ProfilePage />} />
             <Route path='/search' element={<SearchPageElement />} />
           </Routes>
         </AuthProvider>
@@ -48,7 +48,7 @@ function SignInPage() {
 function AccountPage() {
   return (
     <div>
-      <Account/>
+      <Account section='items'/>
     </div>
   );
 }
@@ -56,7 +56,7 @@ function AccountPage() {
 function AddressPage() {
   return (
     <div>
-      <Account/>
+      <Account section='address'/>
     </div>
   );
 }

@@ -143,6 +143,47 @@ export function AuthProvider( {children} ) {
     });
   }
 
+  async function setAddressByUID(name, surname, uid, street, phone, postal) {
+    return fetch('/address/add', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        name: name,
+        surname: surname,
+        uid: uid,
+        street: street,
+        phone: phone,
+        postal: postal
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
+    });
+  }
+
+  async function getAddressByUID(userID) {
+    return fetch('/address/get', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        userID: userID,
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
+    });
+  }
+
   useEffect(() => {
     localStorage.setItem('user', JSON.stringify(currentUser));
   }, [currentUser]);
@@ -157,6 +198,8 @@ export function AuthProvider( {children} ) {
     setItemByUID,
     deleteItemByID,
     editItemByID,
+    setAddressByUID,
+    getAddressByUID,
   }
 
   return (

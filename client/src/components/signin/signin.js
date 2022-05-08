@@ -13,7 +13,7 @@ function Account() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    currentUser && navigate('/account');
+    currentUser && navigate('/account/items');
   }, []);
 
   async function handleSubmit(e) {
@@ -23,7 +23,7 @@ function Account() {
       setError('');
       setLoading(true);
       await signin(emailRef.current.value, passwordRef.current.value);
-      navigate('/account');
+      navigate('/account/items');
     } catch (error) {
       error ? setError(error.message.replace(/Firebase: /,'')) : setError('Could not sign in.');
     }
