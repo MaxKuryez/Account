@@ -243,7 +243,7 @@ app.post('/address/add', async (req, res) => {
     return res.status(400).json('Provide the postal code!');
   }
   if ( !/^\d+$/.test(postal) || postal.length < 5 || postal.length > 6) {
-    return res.status(400).json('Provide the phone postal code between 5 and 6 digits!');
+    return res.status(400).json('Provide the postal code between 5 and 6 digits!');
   }
   const adddressAdded = {
     name: name,
@@ -256,6 +256,60 @@ app.post('/address/add', async (req, res) => {
   }
   await firebase.db.collection('addresses').add(adddressAdded).then(() => {
     return res.json(adddressAdded);
+  }).catch(err => {
+    return res.status(400).json(err.message);
+  });
+});
+
+app.post('/address/edit', async (req, res) => {
+  const { name, surname, street, uid, phone, postal, id } = req.body;
+  if (!name) {
+    return res.status(400).json('Please provide name!');
+  }
+  if (!surname) {
+    return res.status(400).json('Please provide surname!');
+  }
+  if (!uid) {
+    return res.status(400).json('Something went wrong!');
+  }
+  if (!street) {
+    return res.status(400).json('Provide the street!');
+  }
+  if (!phone) {
+    return res.status(400).json('Provide the phone!');
+  }
+  if ( !/^\d+$/.test(phone) || phone.length < 9 || phone.length > 11) {
+    return res.status(400).json('Provide the phone number between 9 and 11 digits!');
+  }
+  if (!postal) {
+    return res.status(400).json('Provide the postal code!');
+  }
+  if ( !/^\d+$/.test(postal) || postal.length < 5 || postal.length > 6) {
+    return res.status(400).json('Provide the postal code between 5 and 6 digits!');
+  }
+  const adddressAdded = {
+    name: name,
+    surname: surname,
+    street: street,
+    phone: phone,
+    postal: postal,
+    updatedAt: new Date().getTime(),
+  }
+  const addressRef = firebase.db.collection('addresses').doc(id);
+  await addressRef.get().then(async address => {
+    if (address && address.data() && address.data().uid == uid) {
+      await addressRef.update(adddressAdded).then(( data ) => {
+        const addressUpdated = {
+          id: id,
+          updated: true
+        };
+        res.json(addressUpdated);
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+    } else {
+      return res.status(400).json('User id incorrect');
+    }
   }).catch(err => {
     return res.status(400).json(err.message);
   });

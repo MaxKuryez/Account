@@ -10,7 +10,7 @@ function HomePage() {
   return(
     <div className='gnav-container'>
       <Search />
-      { currentUser ? <><Link to='/account' variant='link' className='sign-in' >Account</Link></> :
+      { currentUser ? <><Link to='/account/items' variant='link' className='sign-in' >Account</Link></> :
       <><Link to='/signin' variant='link' className='sign-in' >Sign In</Link></>}
     </div>
   );

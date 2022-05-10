@@ -184,6 +184,30 @@ export function AuthProvider( {children} ) {
     });
   }
 
+  async function editAddressByUID(name, surname, uid, street, phone, postal, id) {
+    return fetch('/address/edit', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        name: name,
+        surname: surname,
+        uid: uid,
+        street: street,
+        phone: phone,
+        postal: postal,
+        id: id
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
+    });
+  }
+
   useEffect(() => {
     localStorage.setItem('user', JSON.stringify(currentUser));
   }, [currentUser]);
@@ -200,6 +224,7 @@ export function AuthProvider( {children} ) {
     editItemByID,
     setAddressByUID,
     getAddressByUID,
+    editAddressByUID,
   }
 
   return (

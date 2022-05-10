@@ -10,7 +10,7 @@ export default function Account( props ) {
   const [error, setError] = useState('');
   const [errorMain, setErrorMain] = useState('');
   const [address, setAddress] = useState(null);
-  const { setAddressByUID, getAddressByUID } = useAuth();
+  const { setAddressByUID, getAddressByUID, editAddressByUID } = useAuth();
   const nameRef = useRef();
   const surnameRef = useRef();
   const streetRef = useRef();
@@ -30,7 +30,6 @@ export default function Account( props ) {
     try {
       setError('');
       await setAddressByUID(name, surname, uid, street, phone, postal).then((data) => {
-        setAddress(data);
         close();
         renderAddress();
       });
@@ -39,9 +38,25 @@ export default function Account( props ) {
     }
   }
 
-  async function editAddress(e, id){
+  async function editAddress(e, id, close){
     e.preventDefault();
-    //edit address
+
+    let name = nameRef.current.value;
+    let surname = surnameRef.current.value;
+    let street = streetRef.current.value;
+    let phone = phoneRef.current.value;
+    let postal = postalRef.current.value;
+    let uid = props.currentUser.id;
+
+    try {
+      setError('');
+      await editAddressByUID(name, surname, uid, street, phone, postal, id).then((data) => {
+        close();
+        renderAddress();
+      });
+    } catch (error) {
+      error ? setError(error.message) : setError('Could not edit an address.');
+    }
   }
 
   async function removeAddress(e, id){
@@ -132,7 +147,8 @@ export default function Account( props ) {
                           <h2 className='info'>Edit an Address</h2>
                           <h2 className='close x-btn ' onClick={close}>x</h2>
                         </div>
-                        <Form onSubmit={(e) => { close(); editAddress(e, address.id); }}>
+                        {error && <Alert variant='danger'>{error}</Alert>}
+                        <Form onSubmit={(e) => { editAddress(e, address.id, close); }}>
                           <Form.Group className='mt-3' id='name'>
                             <Form.Label>Name</Form.Label>
                             <Form.Control type='name' ref={nameRef} defaultValue={address.name}/>
@@ -169,6 +185,7 @@ export default function Account( props ) {
                           <h2 className='info'>Delete an address?</h2>
                           <h2 className='close x-btn ' onClick={close}>x</h2>
                         </div>
+                        {error && <Alert variant='danger'>{error}</Alert>}
                         <Form>
                         <div className='row item-col'>
                           <Button className='remove-col w-40 mt-4 col-sm-6'  onClick={(e) => { close(); removeAddress(e, address.id); }} type='submit'>Delete</Button>
