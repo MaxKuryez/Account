@@ -269,7 +269,7 @@ app.post('/address/edit', async (req, res) => {
   if (!surname) {
     return res.status(400).json('Please provide surname!');
   }
-  if (!uid) {
+  if (!uid || !id) {
     return res.status(400).json('Something went wrong!');
   }
   if (!street) {
@@ -313,6 +313,45 @@ app.post('/address/edit', async (req, res) => {
   }).catch(err => {
     return res.status(400).json(err.message);
   });
+});
+
+app.post('/address/delete', async (req, res) => {
+  const { uid, id } = req.body;
+  if (!uid || !id) {
+    return res.status(400).json('Something went wrong!');
+  }
+  const addressRef = firebase.db.collection('addresses').doc(id);
+  await addressRef.get().then(async address => {
+    if (address && address.data() && address.data().uid == uid) {
+      await addressRef.delete().then(( data ) => {
+        const addressUpdated = {
+          id: id,
+          deleted: true
+        };
+        res.json(addressUpdated);
+      }).catch(err => {
+        return res.status(400).json(err.message);
+      });
+    } else {
+      return res.status(400).json('User id incorrect');
+    }
+  }).catch(err => {
+    return res.status(400).json(err.message);
+  });
+  //if (!itemID) {
+  //  return res.status(400).json('No item id');
+  //} else {
+  //  await firebase.db.collection('items').doc(itemID).get().then((querySnapshot) => {
+  //    querySnapshot.ref.delete();
+  //    const ItemDeleted = {
+  //      id: itemID,
+  //      deleted: true
+  //    }
+  //    return res.json(ItemDeleted);
+  //  }).catch(err => {
+  //    return res.status(400).json(err.message);
+  //  });
+  //}
 });
 
 app.post('/address/get', async (req, res) => {

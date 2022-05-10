@@ -208,6 +208,25 @@ export function AuthProvider( {children} ) {
     });
   }
 
+  async function deleteAddressbyID(id, uid) {
+    return fetch('/address/delete', {
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      body: JSON.stringify({
+        id: id,
+        uid: uid
+      })
+    }).then(async response => {
+      const isJson = response.headers.get('content-type')?.includes('application/json');
+      const data = isJson ? await response.json() : null;
+      if (!response.ok) {
+          throw new Error(data);
+      } else {
+        return data;
+      }
+    });
+  }
+
   useEffect(() => {
     localStorage.setItem('user', JSON.stringify(currentUser));
   }, [currentUser]);
@@ -225,6 +244,7 @@ export function AuthProvider( {children} ) {
     setAddressByUID,
     getAddressByUID,
     editAddressByUID,
+    deleteAddressbyID,
   }
 
   return (

@@ -10,7 +10,7 @@ export default function Account( props ) {
   const [error, setError] = useState('');
   const [errorMain, setErrorMain] = useState('');
   const [address, setAddress] = useState(null);
-  const { setAddressByUID, getAddressByUID, editAddressByUID } = useAuth();
+  const { setAddressByUID, getAddressByUID, editAddressByUID, deleteAddressbyID } = useAuth();
   const nameRef = useRef();
   const surnameRef = useRef();
   const streetRef = useRef();
@@ -59,9 +59,20 @@ export default function Account( props ) {
     }
   }
 
-  async function removeAddress(e, id){
+  async function removeAddress(e, id, close){
     e.preventDefault();
-    //remove address
+
+    let uid = props.currentUser.id;
+
+    try {
+      setError('');
+      await deleteAddressbyID(id, uid).then((data) => {
+        close();
+        renderAddress();
+      });
+    } catch (error) {
+      error ? setError(error.message) : setError('Could not remove an address.');
+    }
   }
 
   async function renderAddress(){
@@ -74,6 +85,8 @@ export default function Account( props ) {
         let userAddress = await getAddressByUID(userStoredItem.id);
         if (userAddress && userAddress[0]) {
           setAddress(userAddress[0]);
+        } else {
+          setAddress(null);
         }
       } catch (error) {
         error ? setErrorMain(error.message.replace(/Firebase: /,'')) : setErrorMain('Could not load address.');
@@ -188,7 +201,7 @@ export default function Account( props ) {
                         {error && <Alert variant='danger'>{error}</Alert>}
                         <Form>
                         <div className='row item-col'>
-                          <Button className='remove-col w-40 mt-4 col-sm-6'  onClick={(e) => { close(); removeAddress(e, address.id); }} type='submit'>Delete</Button>
+                          <Button className='remove-col w-40 mt-4 col-sm-6'  onClick={(e) => { removeAddress(e, address.id, close); }} type='submit'>Delete</Button>
                           <Button className='remove-col w-40 mt-4 col-sm-6' onClick={(e) => { close(); }} type='submit'>Cancel</Button>
                         </div>
                         </Form>
