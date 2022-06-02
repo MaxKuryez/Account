@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/auth_context';
 import Popup from 'reactjs-popup';
 import EditIcon from './svg/edit';
 import RemoveIcon from './svg/file-x';
+import AccountMap from './map';
 import '../account.scss';
 
 export default function Account( props ) {
@@ -213,6 +214,7 @@ export default function Account( props ) {
             </div>
         </div></> :
         <><div className='mb-3'>You do not have an address, please add some.</div></>}
+        <AccountMap />
     </div>
   );
 }

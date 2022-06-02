@@ -338,20 +338,6 @@ app.post('/address/delete', async (req, res) => {
   }).catch(err => {
     return res.status(400).json(err.message);
   });
-  //if (!itemID) {
-  //  return res.status(400).json('No item id');
-  //} else {
-  //  await firebase.db.collection('items').doc(itemID).get().then((querySnapshot) => {
-  //    querySnapshot.ref.delete();
-  //    const ItemDeleted = {
-  //      id: itemID,
-  //      deleted: true
-  //    }
-  //    return res.json(ItemDeleted);
-  //  }).catch(err => {
-  //    return res.status(400).json(err.message);
-  //  });
-  //}
 });
 
 app.post('/address/get', async (req, res) => {
